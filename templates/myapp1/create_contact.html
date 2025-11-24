@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Contact</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Center Card */
+        .container {
+            width: 50%;
+            margin: 40px auto;
+            background: white;
+            padding: 40px 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 30px;
+        }
+
+        /* Align label + input nicely */
+        form p {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        form label {
+            width: 130px;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        form input {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-left: 10px;
+        }
+
+        /* Create button */
+      button[type="submit"] {
+        width: 220px;
+        padding: 14px 0;
+        background: #4a4fe4;
+        color: white;
+        border: none;
+        font-size: 17px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+        margin: 25px auto 0 auto;
+        display: block;               
+        }
+
+      button[type="submit"]:hover {
+        background: #373cd6;
+      }
+
+        /* Back button */
+        .back-btn {
+            display: block;
+            width: fit-content;
+            margin: 25px auto 0;
+            padding: 10px 18px;
+            background: #eee;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #373cd6;
+            border: 1px solid #373cd6;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #e3e3e3;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Add a New Contact</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create</button>
+    </form>
+
+    <a href="/" class="back-btn">Back to Home</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Doctor Recommendation Engine</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f6f6fc;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            width: 650px;
+            padding: 35px 45px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 30px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        /* Make the two input fields more uniform */
+        .two-cols {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .two-cols div {
+            flex: 1;
+        }
+
+        /* Make SEARCH button match Back To Home button */
+        button {
+            width: 200px;
+            display: block;
+            margin: 25px auto 0;
+            padding: 10px;
+            background: #373cd6;
+            border: 1px solid #373cd6;
+            color: #ffffff; 
+            border-radius: 8px;
+            font-size: 17px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #e6e6ff;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background: #ececff;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            margin-top: 30px;
+            display: block;
+            text-align: center;
+            padding: 10px;
+            width: 200px;
+            margin-left: auto;
+            margin-right: auto;
+            background: #f0f0ff;
+            border: 1px solid #373cd6;
+            color: #373cd6;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #e6e6ff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Doctor Recommendation Engine</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Specialty:</label>
+        <input type="text" name="specialty" placeholder="Cardiologist">
+
+        <label>City:</label>
+        <input type="text" name="city" placeholder="Beirut">
+
+        <div class="two-cols">
+            <div>
+                <label>Max fees:</label>
+                <input type="number" name="max_fees" placeholder="100">
+            </div>
+
+            <div>
+                <label>Min rating:</label>
+                <input type="number" step="0.1" name="min_rating" placeholder="4.0">
+            </div>
+        </div>
+
+        <button type="submit">Search</button>
+    </form>
+
+    <h2 style="margin-top: 35px;">Results:</h2>
+
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Specialty</th>
+            <th>City</th>
+            <th>Fees</th>
+            <th>Rating</th>
+            <th>Phone</th>
+        </tr>
+
+        {% for d in results %}
+            <tr>
+                <td>{{ d.full_name }}</td>
+                <td>{{ d.specialty }}</td>
+                <td>{{ d.city }}</td>
+                <td>{{ d.fees }}</td>
+                <td>{{ d.rating }}</td>
+                <td>{{ d.phone }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center; font-style:italic;">
+                    No matching doctors.
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <a href="/" class="back-btn">Back to Home</a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Contact</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f6f6fc;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            width: 700px;
+            padding: 35px 45px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 30px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button[type="submit"] {
+        width: 220px;
+        padding: 14px 0;
+        background: #4a4fe4;
+        color: white;
+        border: none;
+        font-size: 17px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+        margin: 25px auto 0 auto;
+        display: block;               
+        }
+
+      button[type="submit"]:hover {
+        background: #373cd6;
+      }
+
+        /* Back to Contact List button */
+        .back-btn {
+            margin-top: 25px;
+            display: block;
+            width: 200px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            padding: 10px;
+            background: #f0f0ff;
+            border: 1px solid #373cd6;
+            color: #373cd6;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #e7e7ff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Edit Contact</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <a href="/" class="back-btn">Back to Home</a>
+
+</div>
+
+</body>
+</html>

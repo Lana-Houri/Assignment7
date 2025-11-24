@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact List</title>
+
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f5f6fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header */
+        .header {
+            background: #ffffff;
+            padding: 20px 40px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 26px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        /* Top action links */
+        .actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 20px;
+            font-size: 16px;
+        }
+
+        .actions a {
+            text-decoration: none;
+            padding: 8px 14px;
+            background: #354fcf;
+            color: white;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .actions a:hover {
+            background: #354fcf;
+        }
+
+        /* Cards Grid */
+        .container {
+            width: 90%;
+            margin: 30px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            grid-gap: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 3px 12px rgba(0,0,0,0.08);
+            transition: 0.25s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0px 6px 18px rgba(0,0,0,0.12);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #222;
+        }
+
+        .card-line {
+            margin: 4px 0;
+            font-size: 15px;
+            color: #444;
+        }
+
+        .card-line span {
+            font-weight: bold;
+            color: #111;
+        }
+
+        /* Edit & Delete buttons */
+        .card-actions {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 7px 14px;
+            text-decoration: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .btn-edit {
+            background: #354fcf;
+        }
+        .btn-delete {
+            background: #e03131;
+        }
+
+        .btn-edit:hover { background: #354fcf; }
+        .btn-delete:hover { background: #c92a2a; }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <h2>Contact List</h2>
+
+    <div class="actions">
+        <a href="/create/">➕ Add Contact</a>
+        <a href="/search/">🔎 Search</a>
+        <a href="/recommend/">⭐ Recommend</a>
+        <a href="/chatbot/">🤖 Chat with AI</a>
+    </div>
+</div>
+
+<!-- Cards Grid -->
+<div class="container">
+
+    {% for c in contacts %}
+    <div class="card">
+
+        <div class="card-title">👤 {{ c.full_name }}</div>
+
+        <div class="card-line">❤️ <span>Specialty:</span> {{ c.specialty }}</div>
+        <div class="card-line">📍 <span>City:</span> {{ c.city }}</div>
+        <div class="card-line">⭐ <span>Rating:</span> {{ c.rating }}</div>
+        <div class="card-line">💲 <span>Fees:</span> {{ c.fees }}</div>
+        <div class="card-line">☎️ <span>Phone:</span> {{ c.phone }}</div>
+
+        <div class="card-actions">
+            <a class="btn-edit" href="/update/{{ c.id }}/">✏️ Edit</a>
+            <a class="btn-delete" href="/delete/{{ c.id }}/" onclick="return confirm('Delete this contact?');">🗑 Delete</a>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+</body>
+</html>

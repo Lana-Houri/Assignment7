@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Chatbot Assistant</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f6f6fc;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            width: 700px;
+            padding: 35px 45px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        /* Chat box */
+        .chat-box {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f0f0ff;
+            margin-bottom: 20px;
+        }
+
+        .msg {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            max-width: 85%;
+            line-height: 1.4;
+        }
+
+        .you {
+            background: #dce2ff;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .bot {
+            background: #e8e8e8;
+            margin-right: auto;
+        }
+
+        .msg-text {
+            margin-top: 6px;
+        }
+
+        /* Input area */
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .input-row input {
+            flex: 1;
+            padding: 14px;
+            border-radius: 7px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .input-row button {
+            background: #4a4fe4;
+            color: white;
+            border: none;
+            padding: 14px 22px;
+            font-size: 16px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .input-row button:hover {
+            background: #373cd6;
+        }
+
+        /* Back button */
+        .back-btn {
+            margin-top: 25px;
+            display: block;
+            width: 180px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            padding: 10px;
+            background: #f0f0ff;
+            border: 1px solid #373cd6;
+            color: #373cd6;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #e7e7ff;
+        }
+
+        .chat-card-list {
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-card {
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 8px;
+            padding: 10px 12px;
+            background: #fbfbff;
+        }
+
+        .chat-card-name {
+            font-weight: 600;
+            color: #1d1f3f;
+        }
+
+        .chat-card-line {
+            font-size: 14px;
+            color: #444;
+            margin-top: 3px;
+        }
+
+        .chat-card-link {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #4a4fe4;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .chat-card-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>AI Chatbot Assistant</h1>
+
+    <div class="chat-box">
+        {% if messages %}
+            {% for m in messages %}
+                <div class="msg {% if m.from == 'you' %}you{% else %}bot{% endif %}">
+                    <strong>{{ m.from|title }}:</strong>
+                    <div class="msg-text">{{ m.text|safe }}</div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="input-row">
+            <input 
+                type="text" 
+                name="message" 
+                placeholder="Ask me anything..." 
+                required
+            >
+            <button type="submit">Send</button>
+        </div>
+    </form>
+
+    <a href="/" class="back-btn">Back to Home</a>
+
+</div>
+
+</body>
+</html>
