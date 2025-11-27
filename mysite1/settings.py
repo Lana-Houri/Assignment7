@@ -118,9 +118,13 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# ADD THESE TWO LINES (this is the only change):
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-GEMINI_API_KEY ="AIzaSyBgN9xztoYOHacptV3XJTmtvOt8xK9LGBw"
+GEMINI_API_KEY ="AIzaSyAgoaqExo5chkg3DiYdmPF_AreuCS1tjYE"

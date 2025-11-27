@@ -1,178 +1,314 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Doctor Recommendation Engine</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Doctors - MediConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f6f6fc;
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-hover: #2563eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --accent-primary: #3b82f6;
+            --accent-hover: #60a5fa;
+        }
+
+        * {
             margin: 0;
-            padding: 40px;
-            display: flex;
-            justify-content: center;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px 20px;
+            transition: background-color 0.3s ease;
         }
 
         .container {
-            background: white;
-            width: 650px;
-            padding: 35px 45px;
-            border-radius: 14px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-width: 1000px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
         }
 
         h1 {
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 30px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--border-color);
+        }
+
+        .form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.5s ease 0.1s both;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .form-field {
+            animation: fadeInField 0.5s ease both;
+        }
+
+        .form-field:nth-child(1) { animation-delay: 0.2s; }
+        .form-field:nth-child(2) { animation-delay: 0.3s; }
+        .form-field:nth-child(3) { animation-delay: 0.4s; }
+        .form-field:nth-child(4) { animation-delay: 0.5s; }
+
+        @keyframes fadeInField {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         label {
-            font-weight: bold;
             display: block;
-            margin-top: 15px;
-            margin-bottom: 6px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
 
         input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             font-size: 15px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.2s;
         }
 
-        /* Make the two input fields more uniform */
-        .two-cols {
-            display: flex;
-            gap: 15px;
-            margin-top: 5px;
+        input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        .two-cols div {
-            flex: 1;
-        }
-
-        /* Make SEARCH button match Back To Home button */
-        button {
-            width: 200px;
-            display: block;
-            margin: 25px auto 0;
-            padding: 10px;
-            background: #373cd6;
-            border: 1px solid #373cd6;
-            color: #ffffff; 
-            border-radius: 8px;
-            font-size: 17px;
+        .search-btn {
+            grid-column: 1 / -1;
+            padding: 14px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
             cursor: pointer;
-            text-align: center;
-            transition: 0.2s;
+            transition: all 0.2s;
+            animation: fadeIn 0.5s ease 0.6s both;
         }
 
-        button:hover {
-            background: #e6e6ff;
+        .search-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
 
-        table {
-            width: 100%;
-            margin-top: 30px;
-            border-collapse: collapse;
+        .results-header {
+            margin: 32px 0 24px 0;
+            animation: fadeIn 0.5s ease;
         }
 
-        th, td {
-            padding: 12px;
-            border: 1px solid #ccc;
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
         }
 
-        th {
-            background: #ececff;
-            font-weight: bold;
+        .result-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            animation: slideUp 0.5s ease both;
+        }
+
+        .result-card:nth-child(1) { animation-delay: 0.1s; }
+        .result-card:nth-child(2) { animation-delay: 0.2s; }
+        .result-card:nth-child(3) { animation-delay: 0.3s; }
+        .result-card:nth-child(4) { animation-delay: 0.4s; }
+        .result-card:nth-child(5) { animation-delay: 0.5s; }
+        .result-card:nth-child(6) { animation-delay: 0.6s; }
+
+        .result-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .result-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .result-specialty {
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .result-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-top: 1px solid var(--border-color);
+            font-size: 14px;
         }
 
         .back-btn {
-            margin-top: 30px;
-            display: block;
-            text-align: center;
-            padding: 10px;
-            width: 200px;
-            margin-left: auto;
-            margin-right: auto;
-            background: #f0f0ff;
-            border: 1px solid #373cd6;
-            color: #373cd6;
-            border-radius: 8px;
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
             text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.2s;
+            margin-top: 32px;
         }
 
         .back-btn:hover {
-            background: #e6e6ff;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
     </style>
 </head>
-
 <body>
-
-<div class="container">
-
-    <h1>Doctor Recommendation Engine</h1>
-
-    <form method="POST">
-        {% csrf_token %}
-
-        <label>Specialty:</label>
-        <input type="text" name="specialty" placeholder="Cardiologist">
-
-        <label>City:</label>
-        <input type="text" name="city" placeholder="Beirut">
-
-        <div class="two-cols">
-            <div>
-                <label>Max fees:</label>
-                <input type="number" name="max_fees" placeholder="100">
-            </div>
-
-            <div>
-                <label>Min rating:</label>
-                <input type="number" step="0.1" name="min_rating" placeholder="4.0">
-            </div>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Find Doctors</h1>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
         </div>
 
-        <button type="submit">Search</button>
-    </form>
+        <div class="form-card">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label>Specialty</label>
+                        <input type="text" name="specialty" placeholder="e.g. Cardiologist">
+                    </div>
+                    <div class="form-field">
+                        <label>City</label>
+                        <input type="text" name="city" placeholder="e.g. New York">
+                    </div>
+                    <div class="form-field">
+                        <label>Max Fees ($)</label>
+                        <input type="number" name="max_fees" placeholder="200">
+                    </div>
+                    <div class="form-field">
+                        <label>Min Rating</label>
+                        <input type="number" step="0.1" name="min_rating" placeholder="4.0">
+                    </div>
+                    <button type="submit" class="search-btn">🔍 Search Doctors</button>
+                </div>
+            </form>
+        </div>
 
-    <h2 style="margin-top: 35px;">Results:</h2>
+        {% if results %}
+        <h2 class="results-header">Found {{ results|length }} doctor{{ results|length|pluralize }}</h2>
+        <div class="results-grid">
+            {% for d in results %}
+            <div class="result-card">
+                <div class="result-name">{{ d.full_name }}</div>
+                <div class="result-specialty">{{ d.specialty }}</div>
+                <div class="result-detail">
+                    <span>📍 City</span>
+                    <strong>{{ d.city }}</strong>
+                </div>
+                <div class="result-detail">
+                    <span>💵 Fees</span>
+                    <strong>${{ d.fees }}</strong>
+                </div>
+                <div class="result-detail">
+                    <span>⭐ Rating</span>
+                    <strong>{{ d.rating }}</strong>
+                </div>
+                <div class="result-detail">
+                    <span>📞 Phone</span>
+                    <strong>{{ d.phone }}</strong>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Specialty</th>
-            <th>City</th>
-            <th>Fees</th>
-            <th>Rating</th>
-            <th>Phone</th>
-        </tr>
+        <a href="/" class="back-btn">← Back to Home</a>
+    </div>
 
-        {% for d in results %}
-            <tr>
-                <td>{{ d.full_name }}</td>
-                <td>{{ d.specialty }}</td>
-                <td>{{ d.city }}</td>
-                <td>{{ d.fees }}</td>
-                <td>{{ d.rating }}</td>
-                <td>{{ d.phone }}</td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="6" style="text-align:center; font-style:italic;">
-                    No matching doctors.
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
-
-    <a href="/" class="back-btn">Back to Home</a>
-
-</div>
-
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    </script>
 </body>
 </html>

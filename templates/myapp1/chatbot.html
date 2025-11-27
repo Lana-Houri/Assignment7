@@ -1,188 +1,475 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Chatbot Assistant</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Medical Assistant - MediConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f6f6fc;
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-hover: #2563eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --accent-primary: #3b82f6;
+            --accent-hover: #60a5fa;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+        }
+
+        * {
             margin: 0;
-            padding: 40px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            transition: background-color 0.3s ease;
         }
 
-        .container {
-            background: white;
-            width: 700px;
-            padding: 35px 45px;
-            border-radius: 14px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        /* Chat box */
-        .chat-box {
-            max-height: 400px;
-            overflow-y: auto;
-            padding: 15px;
-            border-radius: 10px;
-            background: #f0f0ff;
-            margin-bottom: 20px;
-        }
-
-        .msg {
-            margin-bottom: 15px;
-            padding: 12px 15px;
-            border-radius: 10px;
-            max-width: 85%;
-            line-height: 1.4;
-        }
-
-        .you {
-            background: #dce2ff;
-            margin-left: auto;
-            text-align: right;
-        }
-
-        .bot {
-            background: #e8e8e8;
-            margin-right: auto;
-        }
-
-        .msg-text {
-            margin-top: 6px;
-        }
-
-        /* Input area */
-        .input-row {
+        .chat-header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
         }
 
-        .input-row input {
-            flex: 1;
-            padding: 14px;
-            border-radius: 7px;
-            border: 1px solid #ccc;
-            font-size: 16px;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
-        .input-row button {
-            background: #4a4fe4;
-            color: white;
-            border: none;
-            padding: 14px 22px;
-            font-size: 16px;
-            border-radius: 7px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .input-row button:hover {
-            background: #373cd6;
-        }
-
-        /* Back button */
         .back-btn {
-            margin-top: 25px;
-            display: block;
-            width: 180px;
-            margin-left: auto;
-            margin-right: auto;
-            text-align: center;
-            padding: 10px;
-            background: #f0f0ff;
-            border: 1px solid #373cd6;
-            color: #373cd6;
-            border-radius: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
             text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
         }
 
         .back-btn:hover {
-            background: #e7e7ff;
+            background: var(--bg-secondary);
         }
 
-        .chat-card-list {
-            margin-top: 14px;
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ai-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .header-text h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header-text p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .online-indicator {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--border-color);
+        }
+
+        .suggestions-bar {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            overflow-x: auto;
+        }
+
+        .suggestions-scroll {
+            display: flex;
+            gap: 12px;
+        }
+
+        .suggestion-chip {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 13px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .suggestion-chip:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: var(--bg-secondary);
+        }
+
+        .messages-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 20px;
         }
 
-        .chat-card {
-            border: 1px solid rgba(0,0,0,0.08);
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
             border-radius: 8px;
-            padding: 10px 12px;
-            background: #fbfbff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
         }
 
-        .chat-card-name {
+        .message.bot .message-avatar {
+            background: var(--accent-primary);
+        }
+
+        .message.user .message-avatar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+
+        .message.bot .message-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+
+        .message.user .message-content {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .doctor-result {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            display: flex;
+            gap: 16px;
+            transition: all 0.2s;
+        }
+
+        .doctor-result:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .result-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+        }
+
+        .result-info {
+            flex: 1;
+        }
+
+        .result-name {
+            font-size: 16px;
             font-weight: 600;
-            color: #1d1f3f;
+            margin-bottom: 4px;
         }
 
-        .chat-card-line {
-            font-size: 14px;
-            color: #444;
-            margin-top: 3px;
+        .result-specialty {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
         }
 
-        .chat-card-link {
-            display: inline-block;
-            margin-top: 8px;
-            font-size: 14px;
-            color: #4a4fe4;
+        .result-details {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .result-detail {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .result-link {
+            font-size: 13px;
+            color: var(--accent-primary);
             text-decoration: none;
             font-weight: 600;
         }
 
-        .chat-card-link:hover {
+        .result-link:hover {
             text-decoration: underline;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 60px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .welcome-screen h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .welcome-screen p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .input-container {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 20px 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .input-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            gap: 12px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .send-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        @media (max-width: 768px) {
+            .message-content {
+                max-width: 85%;
+            }
+
+            .welcome-screen h2 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
-
 <body>
 
-<div class="container">
-
-    <h1>AI Chatbot Assistant</h1>
-
-    <div class="chat-box">
-        {% if messages %}
-            {% for m in messages %}
-                <div class="msg {% if m.from == 'you' %}you{% else %}bot{% endif %}">
-                    <strong>{{ m.from|title }}:</strong>
-                    <div class="msg-text">{{ m.text|safe }}</div>
+    <div class="chat-header">
+        <div class="header-left">
+            <a href="/" class="back-btn">← Back</a>
+            <div class="header-info">
+                <div class="ai-avatar">🤖</div>
+                <div class="header-text">
+                    <h1>AI Medical Assistant</h1>
+                    <p><span class="online-indicator"></span>Online</p>
                 </div>
-            {% endfor %}
-        {% endif %}
+            </div>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
 
-    <form method="POST">
-        {% csrf_token %}
-        
-        <div class="input-row">
-            <input 
-                type="text" 
-                name="message" 
-                placeholder="Ask me anything..." 
-                required
-            >
-            <button type="submit">Send</button>
+    <div class="suggestions-bar">
+        <div class="suggestions-scroll">
+            <div class="suggestion-chip" onclick="askQuestion('Find me a pediatrician in New York')">👶 Pediatrician in NY</div>
+            <div class="suggestion-chip" onclick="askQuestion('Show cardiologists under 200')">❤️ Affordable Cardiologist</div>
+            <div class="suggestion-chip" onclick="askQuestion('Best rated dermatologists')">⭐ Top Dermatologists</div>
+            <div class="suggestion-chip" onclick="askQuestion('Find a surgeon')">🏥 Find Surgeon</div>
         </div>
-    </form>
+    </div>
 
-    <a href="/" class="back-btn">Back to Home</a>
+    <div class="messages-container" id="messages">
+        <div class="messages-wrapper">
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="message {% if msg.from == 'bot' %}bot{% else %}user{% endif %}">
+                        <div class="message-avatar">
+                            {% if msg.from == 'bot' %}🤖{% else %}👤{% endif %}
+                        </div>
+                        <div class="message-content">
+                            {{ msg.text|safe }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="welcome-screen">
+                    <h2>👋 Welcome to AI Assistant</h2>
+                    <p>I can help you find the perfect healthcare professional. Try asking:</p>
+                    <p style="margin-top: 16px; font-weight: 500;">"Find a pediatrician in Chicago" or "Show me dermatologists rated above 4.5"</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 
-</div>
+    <div class="input-container">
+        <form method="post" id="chatForm" class="input-wrapper">
+            {% csrf_token %}
+            <input type="text" name="message" class="message-input" placeholder="Ask me anything..." required id="messageInput" autocomplete="off">
+            <button type="submit" class="send-btn">Send</button>
+        </form>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        function scrollToBottom() {
+            const messages = document.getElementById('messages');
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function askQuestion(question) {
+            document.getElementById('messageInput').value = question;
+            document.getElementById('chatForm').submit();
+        }
+
+        scrollToBottom();
+
+        document.getElementById('messageInput').focus();
+    </script>
 
 </body>
 </html>

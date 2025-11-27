@@ -1,66 +1,229 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Success</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success - MediConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f6f6fc;
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-hover: #2563eb;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
             margin: 0;
-            padding: 40px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            min-height: 100vh;
             display: flex;
+            align-items: center;
             justify-content: center;
+            padding: 20px;
+            transition: background-color 0.3s ease;
         }
 
-        .container {
-            background: white;
-            width: 600px;
-            padding: 40px 50px;
-            border-radius: 14px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        .success-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 60px 40px;
             text-align: center;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        h2 {
-            font-size: 26px;
-            color: #373cd6;
-            margin-bottom: 20px;
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.3) rotate(-10deg); }
+            50% { transform: scale(1.05) rotate(3deg); }
+            70% { transform: scale(0.95) rotate(-2deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+
+        .checkmark-wrapper {
+            position: relative;
+            margin: 0 auto 32px;
+            width: 100px;
+            height: 100px;
         }
 
         .checkmark {
-            font-size: 60px;
-            color: #373cd6;
-            margin-bottom: 10px;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite, rotate 0.6s ease 0.3s both;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
         }
 
-        .back-btn {
-            margin-top: 25px;
-            display: inline-block;
-            padding: 10px 20px;
-            background: #f0f0ff;
-            border: 1px solid #373cd6;
-            color: #373cd6;
-            border-radius: 8px;
-            text-decoration: none;
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 10px 35px rgba(16, 185, 129, 0.5); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(-180deg) scale(0); }
+            to { transform: rotate(0deg) scale(1); }
+        }
+
+        .checkmark::before {
+            content: '✓';
+            color: white;
+            font-size: 56px;
+            font-weight: bold;
+            animation: checkZoom 0.4s ease 0.6s both;
+        }
+
+        @keyframes checkZoom {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--accent-primary);
+            animation: confettiFall 1.5s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(300px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .confetti:nth-child(1) { left: 10%; background: #ef4444; animation-delay: 0.1s; }
+        .confetti:nth-child(2) { left: 30%; background: #f59e0b; animation-delay: 0.2s; }
+        .confetti:nth-child(3) { left: 50%; background: #10b981; animation-delay: 0.3s; }
+        .confetti:nth-child(4) { left: 70%; background: #3b82f6; animation-delay: 0.4s; }
+        .confetti:nth-child(5) { left: 90%; background: #8b5cf6; animation-delay: 0.5s; }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 12px;
+            animation: fadeInUp 0.6s ease 0.7s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
             font-size: 16px;
+            animation: fadeInUp 0.6s ease 0.8s both;
         }
 
-        .back-btn:hover {
-            background: #e7e7ff;
+        .btn {
+            padding: 14px 32px;
+            background: var(--accent-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.2s;
+            animation: fadeInUp 0.6s ease 0.9s both;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            background: var(--bg-card);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.2s;
+            animation: fadeIn 0.6s ease 1s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
         }
     </style>
 </head>
-
 <body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
 
-<div class="container">
-    <div class="checkmark">✔</div>
+    <div class="success-card">
+        <div class="checkmark-wrapper">
+            <div class="confetti"></div>
+            <div class="confetti"></div>
+            <div class="confetti"></div>
+            <div class="confetti"></div>
+            <div class="confetti"></div>
+            <div class="checkmark"></div>
+        </div>
+        <h1>Success! 🎉</h1>
+        <p>Doctor has been added successfully to the database</p>
+        <a href="/" class="btn">← Back to Home</a>
+    </div>
 
-    <h2>Contact added successfully!</h2>
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
 
-    <a href="/" class="back-btn">Back to Home</a>
-</div>
-
+        // Auto-redirect after 3 seconds
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 3000);
+    </script>
 </body>
 </html>
