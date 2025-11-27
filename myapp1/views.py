@@ -3,98 +3,57 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.contrib.staticfiles.storage import staticfiles_storage
 from .models import Contact
 from .form import CreateContactForm, RecommendationForm
 import re
 import random
 import json
 import hashlib
-import base64
-from io import BytesIO
 
 # ==================== NEW GEMINI SDK SETUP ====================
 try:
-    from google import genai
-    from google.genai import types
+    from google.genai import Client
     
     # Initialize client with API key
-    client = genai.Client(api_key=settings.GEMINI_API_KEY)
-    
-    # Text model is available via client
-    imagen_available = True
+    client = Client(api_key=settings.GEMINI_API_KEY)
     
 except ImportError:
     client = None
-    imagen_available = False
     print("Warning: google-genai not installed. Run: pip install -U google-genai")
 
-# ==================== AVATAR GENERATION WITH IMAGEN 4.0 ====================
-
-def generate_avatar_with_imagen(description, doctor_name):
-    """Generate custom avatar using Imagen 4.0"""
-    
-    if not client or not imagen_available:
-        print("Imagen not available, using fallback")
-        return generate_avatar_from_description(description, doctor_name)
-    
-    try:
-        # Create a professional prompt for Imagen
-        imagen_prompt = f"""
-Professional medical portrait of {doctor_name}.
-{description}
-Style: Clean, professional headshot, medical photography
-Appearance: Professional attire (white coat or medical uniform), friendly and trustworthy expression
-Background: Solid neutral color (soft blue, white, or gray), studio lighting
-Quality: High detail, professional photography, portrait orientation
-Mood: Approachable, professional, trustworthy, calm
-Format: Square avatar, centered face, professional composition
-"""
-        
-        # Generate image with Imagen 4.0 Ultra
-        response = client.models.generate_images(
-            model='imagen-4.0-ultra-generate-001',  # Highest quality Imagen model
-            prompt=imagen_prompt,
-            config=types.GenerateImagesConfig(
-                number_of_images=1,
-                safety_filter_level="block_low_and_above",  # Only valid option
-                person_generation="allow_adult",
-                aspect_ratio="1:1",
-            ),
-        )
-        
-        # Get the generated image
-        if response.generated_images:
-            generated_image = response.generated_images[0].image
-            
-            # Convert PIL Image to base64
-            buffered = BytesIO()
-            generated_image.save(buffered, format="PNG")
-            img_str = base64.b64encode(buffered.getvalue()).decode()
-            
-            # Return as data URL
-            avatar_url = f"data:image/png;base64,{img_str}"
-            
-            return avatar_url, {
-                "method": "imagen-4.0-ultra",
-                "model": "imagen-4.0-ultra-generate-001",
-                "prompt": imagen_prompt
-            }
-        else:
-            raise Exception("No images generated")
-            
-    except Exception as e:
-        print(f"Imagen generation error: {e}")
-        # Fallback to DiceBear
-        return generate_avatar_from_description(description, doctor_name)
+# ==================== FREE AVATAR GENERATION ====================
+# Using DiceBear API (completely free) with AI-powered style selection via Gemini
 
 def generate_avatar_from_description(description, doctor_name):
-    """Generate avatar URL based on AI description (DiceBear fallback)"""
+    """Generate avatar URL using free DiceBear API with AI-powered style selection.
+    Falls back to sample images if APIs are unavailable."""
     
     if not client:
-        return get_random_profile_image(), {"method": "fallback"}
+        # If Gemini is not available, try sample images first, then DiceBear
+        try:
+            # Use hash to consistently select same sample image for same doctor
+            seed = hashlib.md5(doctor_name.encode()).hexdigest()
+            image_index = int(seed, 16) % 8  # 8 sample images available
+            sample_images = [
+                'sample_images/proxy-image.jpeg',
+                'sample_images/proxy-image (1).jpeg',
+                'sample_images/proxy-image (2).jpeg',
+                'sample_images/proxy-image (3).jpeg',
+                'sample_images/proxy-image (4).jpeg',
+                'sample_images/proxy-image (5).jpeg',
+                'sample_images/proxy-image (6).jpeg',
+                'sample_images/proxy-image (7).jpeg',
+            ]
+            avatar_url = staticfiles_storage.url(sample_images[image_index])
+            return avatar_url, {"method": "sample-image", "source": "static"}
+        except:
+            # Final fallback to DiceBear
+            seed = hashlib.md5(doctor_name.encode()).hexdigest()
+            return f"https://api.dicebear.com/7.x/avataaars/svg?seed={seed}", {"method": "dicebear-simple"}
     
     try:
-        # Use Gemini text model to analyze description
+        # Use Gemini text model (FREE) to analyze description and choose avatar style
         prompt = f"""
         Based on this doctor description: "{description}"
         
@@ -117,9 +76,9 @@ def generate_avatar_from_description(description, doctor_name):
         Return ONLY valid JSON, nothing else.
         """
         
-        # Use generate_content via client
+        # Use Gemini text model (FREE tier available)
         response = client.models.generate_content(
-            model='gemini-2.5-flash',  # Latest stable model
+            model='gemini-2.5-flash',  # Free model
             contents=prompt
         )
         
@@ -133,25 +92,66 @@ def generate_avatar_from_description(description, doctor_name):
         
         params = json.loads(result_text.strip())
         
-        # Generate DiceBear avatar URL
+        # Generate DiceBear avatar URL (completely free API)
         style = params.get('style', 'avataaars')
         seed = params.get('seed', hashlib.md5(doctor_name.encode()).hexdigest())
         bg_color = params.get('background_color', '3b82f6')
         
         avatar_url = f"https://api.dicebear.com/7.x/{style}/svg?seed={seed}&backgroundColor={bg_color}"
         
-        params['method'] = 'dicebear'
+        params['method'] = 'dicebear-ai'
         return avatar_url, params
         
     except Exception as e:
         print(f"Avatar generation error: {e}")
-        seed = hashlib.md5(description.encode()).hexdigest()
-        return f"https://api.dicebear.com/7.x/avataaars/svg?seed={seed}", {"method": "fallback"}
+        # Fallback chain: Try sample images first, then DiceBear
+        try:
+            # Use hash to consistently select same sample image
+            seed = hashlib.md5(description.encode()).hexdigest()
+            image_index = int(seed, 16) % 8
+            sample_images = [
+                'sample_images/proxy-image.jpeg',
+                'sample_images/proxy-image (1).jpeg',
+                'sample_images/proxy-image (2).jpeg',
+                'sample_images/proxy-image (3).jpeg',
+                'sample_images/proxy-image (4).jpeg',
+                'sample_images/proxy-image (5).jpeg',
+                'sample_images/proxy-image (6).jpeg',
+                'sample_images/proxy-image (7).jpeg',
+            ]
+            avatar_url = staticfiles_storage.url(sample_images[image_index])
+            return avatar_url, {"method": "sample-image-fallback", "source": "static"}
+        except Exception as fallback_error:
+            print(f"Sample image fallback error: {fallback_error}")
+            # Final fallback to DiceBear
+            seed = hashlib.md5(description.encode()).hexdigest()
+            return f"https://api.dicebear.com/7.x/avataaars/svg?seed={seed}", {"method": "dicebear-fallback"}
+
+def get_sample_image():
+    """Get a random sample image from static folder as fallback"""
+    sample_images = [
+        'sample_images/proxy-image.jpeg',
+        'sample_images/proxy-image (1).jpeg',
+        'sample_images/proxy-image (2).jpeg',
+        'sample_images/proxy-image (3).jpeg',
+        'sample_images/proxy-image (4).jpeg',
+        'sample_images/proxy-image (5).jpeg',
+        'sample_images/proxy-image (6).jpeg',
+        'sample_images/proxy-image (7).jpeg',
+    ]
+    # Use hash of description/name to consistently select same image for same input
+    selected_image = random.choice(sample_images)
+    return staticfiles_storage.url(selected_image)
 
 def get_random_profile_image():
-    """Generate placeholder profile image URL"""
-    num = random.randint(1, 100)
-    return f"https://ui-avatars.com/api/?name=Dr+{num}&size=128&background=random&bold=true"
+    """Generate placeholder profile image URL - uses sample images as fallback"""
+    # Try to use sample images first
+    try:
+        return get_sample_image()
+    except:
+        # Fallback to external API if static files not available
+        num = random.randint(1, 100)
+        return f"https://ui-avatars.com/api/?name=Dr+{num}&size=128&background=random&bold=true"
 
 # ==================== EXISTING VIEWS ====================
 
@@ -205,13 +205,12 @@ def update_contact(request, id):
 
 @csrf_exempt
 def generate_avatar_api(request):
-    """API endpoint for generating avatars with Imagen 4.0 or DiceBear"""
+    """API endpoint for generating avatars using free DiceBear API"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             description = data.get('description', '')
             doctor_name = data.get('name', 'Doctor')
-            use_imagen = data.get('use_imagen', True)
             
             if not description:
                 return JsonResponse({
@@ -219,11 +218,8 @@ def generate_avatar_api(request):
                     'avatar_url': get_random_profile_image()
                 }, status=400)
             
-            # Choose generation method
-            if use_imagen and imagen_available:
-                avatar_url, params = generate_avatar_with_imagen(description, doctor_name)
-            else:
-                avatar_url, params = generate_avatar_from_description(description, doctor_name)
+            # Always use free DiceBear method
+            avatar_url, params = generate_avatar_from_description(description, doctor_name)
             
             return JsonResponse({
                 'success': True,
