@@ -25,6 +25,65 @@ except ImportError:
 # ==================== FREE AVATAR GENERATION ====================
 # Using DiceBear API (completely free) with AI-powered style selection via Gemini
 
+def select_sample_image_by_gender(doctor_name, description=""):
+    """Use AI to determine gender and select appropriate sample image"""
+    sample_images = [
+        'sample_images/proxy-image.jpeg',
+        'sample_images/proxy-image (1).jpeg',
+        'sample_images/proxy-image (2).jpeg',
+        'sample_images/proxy-image (3).jpeg',
+        'sample_images/proxy-image (4).jpeg',
+        'sample_images/proxy-image (5).jpeg',
+        'sample_images/proxy-image (6).jpeg',
+        'sample_images/proxy-image (7).jpeg',
+    ]
+    
+    if not client:
+        # If Gemini not available, use simple hash (not ideal but works)
+        seed = hashlib.md5(doctor_name.encode()).hexdigest()
+        image_index = int(seed, 16) % 8
+        return sample_images[image_index]
+    
+    try:
+        # Use Gemini to determine gender from name and description
+        prompt = f"""
+        Based on the doctor's name "{doctor_name}" and description "{description}",
+        determine the likely gender (male or female).
+        
+        Respond with ONLY a JSON object:
+        {{
+            "gender": "male" or "female",
+            "image_index": 0-7 (select an index that matches the gender)
+        }}
+        
+        For male doctors, prefer indices: 0, 1, 2, 3
+        For female doctors, prefer indices: 4, 5, 6, 7
+        
+        Return ONLY valid JSON, nothing else.
+        """
+        
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt
+        )
+        
+        result_text = response.text.strip()
+        if result_text.startswith('```json'):
+            result_text = result_text.split('```json')[1].split('```')[0]
+        elif result_text.startswith('```'):
+            result_text = result_text.split('```')[1].split('```')[0]
+        
+        params = json.loads(result_text.strip())
+        image_index = params.get('image_index', 0) % 8
+        return sample_images[image_index]
+        
+    except Exception as e:
+        print(f"Gender detection error: {e}, using hash fallback")
+        # Fallback to hash-based selection
+        seed = hashlib.md5(doctor_name.encode()).hexdigest()
+        image_index = int(seed, 16) % 8
+        return sample_images[image_index]
+
 def generate_avatar_from_description(description, doctor_name):
     """Generate avatar URL using free DiceBear API with AI-powered style selection.
     Falls back to sample images if APIs are unavailable."""
@@ -32,9 +91,9 @@ def generate_avatar_from_description(description, doctor_name):
     if not client:
         # If Gemini is not available, try sample images first, then DiceBear
         try:
-            # Use hash to consistently select same sample image for same doctor
+            # Use simple hash-based selection (not ideal but works without AI)
             seed = hashlib.md5(doctor_name.encode()).hexdigest()
-            image_index = int(seed, 16) % 8  # 8 sample images available
+            image_index = int(seed, 16) % 8
             sample_images = [
                 'sample_images/proxy-image.jpeg',
                 'sample_images/proxy-image (1).jpeg',
@@ -106,20 +165,9 @@ def generate_avatar_from_description(description, doctor_name):
         print(f"Avatar generation error: {e}")
         # Fallback chain: Try sample images first, then DiceBear
         try:
-            # Use hash to consistently select same sample image
-            seed = hashlib.md5(description.encode()).hexdigest()
-            image_index = int(seed, 16) % 8
-            sample_images = [
-                'sample_images/proxy-image.jpeg',
-                'sample_images/proxy-image (1).jpeg',
-                'sample_images/proxy-image (2).jpeg',
-                'sample_images/proxy-image (3).jpeg',
-                'sample_images/proxy-image (4).jpeg',
-                'sample_images/proxy-image (5).jpeg',
-                'sample_images/proxy-image (6).jpeg',
-                'sample_images/proxy-image (7).jpeg',
-            ]
-            avatar_url = staticfiles_storage.url(sample_images[image_index])
+            # Use AI to select appropriate sample image based on gender
+            selected_image = select_sample_image_by_gender(doctor_name, description)
+            avatar_url = staticfiles_storage.url(selected_image)
             return avatar_url, {"method": "sample-image-fallback", "source": "static"}
         except Exception as fallback_error:
             print(f"Sample image fallback error: {fallback_error}")
@@ -143,13 +191,32 @@ def get_sample_image():
     selected_image = random.choice(sample_images)
     return staticfiles_storage.url(selected_image)
 
-def get_random_profile_image():
-    """Generate placeholder profile image URL - uses sample images as fallback"""
-    # Try to use sample images first
+def get_random_profile_image(doctor_name=None):
+    """Generate placeholder profile image URL - uses sample images with gender matching"""
+    # If doctor name is provided, use gender-based selection
+    if doctor_name:
+        try:
+            selected_image = select_sample_image_by_gender(doctor_name, "")
+            return staticfiles_storage.url(selected_image)
+        except:
+            pass
+    
+    # Fallback: use random sample image
     try:
-        return get_sample_image()
+        sample_images = [
+            'sample_images/proxy-image.jpeg',
+            'sample_images/proxy-image (1).jpeg',
+            'sample_images/proxy-image (2).jpeg',
+            'sample_images/proxy-image (3).jpeg',
+            'sample_images/proxy-image (4).jpeg',
+            'sample_images/proxy-image (5).jpeg',
+            'sample_images/proxy-image (6).jpeg',
+            'sample_images/proxy-image (7).jpeg',
+        ]
+        selected_image = random.choice(sample_images)
+        return staticfiles_storage.url(selected_image)
     except:
-        # Fallback to external API if static files not available
+        # Final fallback to external API if static files not available
         num = random.randint(1, 100)
         return f"https://ui-avatars.com/api/?name=Dr+{num}&size=128&background=random&bold=true"
 
@@ -158,7 +225,7 @@ def get_random_profile_image():
 def home(request):
     contacts = Contact.objects.all()
     for contact in contacts:
-        contact.profile_image = get_random_profile_image()
+        contact.profile_image = get_random_profile_image(contact.full_name)
     return render(request, 'myapp1/home.html', {'contacts': contacts})
 
 def create_contact(request):
@@ -176,7 +243,7 @@ def update_contact(request, id):
     
     # Generate current avatar
     if not hasattr(contact, 'avatar_url') or not contact.avatar_url:
-        contact.avatar_url = get_random_profile_image()
+        contact.avatar_url = get_random_profile_image(contact.full_name)
     
     if request.method == 'POST':
         form = CreateContactForm(request.POST)
@@ -200,13 +267,14 @@ def update_contact(request, id):
         'form': form, 
         'id': id,
         'contact': contact,
-        'current_avatar': getattr(contact, 'avatar_url', get_random_profile_image())
+        'current_avatar': getattr(contact, 'avatar_url', get_random_profile_image(contact.full_name))
     })
 
 @csrf_exempt
 def generate_avatar_api(request):
     """API endpoint for generating avatars using free DiceBear API"""
     if request.method == 'POST':
+        doctor_name = 'Doctor'  # Default value
         try:
             data = json.loads(request.body)
             description = data.get('description', '')
@@ -215,7 +283,7 @@ def generate_avatar_api(request):
             if not description:
                 return JsonResponse({
                     'error': 'Description required',
-                    'avatar_url': get_random_profile_image()
+                    'avatar_url': get_random_profile_image(doctor_name)
                 }, status=400)
             
             # Always use free DiceBear method
@@ -232,7 +300,7 @@ def generate_avatar_api(request):
             print(f"Avatar API error: {e}")
             return JsonResponse({
                 'error': str(e),
-                'avatar_url': get_random_profile_image()
+                'avatar_url': get_random_profile_image(doctor_name)
             }, status=500)
     
     return JsonResponse({'error': 'POST required'}, status=405)
@@ -247,7 +315,7 @@ def success(request):
 
 def contact_detail(request, id):
     contact = get_object_or_404(Contact, id=id)
-    contact.profile_image = get_random_profile_image()
+    contact.profile_image = get_random_profile_image(contact.full_name)
     return render(request, 'myapp1/contact_detail.html', {'contact': contact})
 
 def recommend(request):
@@ -270,7 +338,7 @@ def recommend(request):
                 results = results.filter(rating__gte=min_rating)
             results = results.order_by('-rating', 'fees')
             for r in results:
-                r.profile_image = get_random_profile_image()
+                r.profile_image = get_random_profile_image(r.full_name)
     else:
         form = RecommendationForm()
     return render(request, "myapp1/recommend.html", {"form": form, "results": results})
@@ -281,7 +349,7 @@ def search(request):
               Contact.objects.filter(specialty__icontains=query) | \
               Contact.objects.filter(city__icontains=query)
     for r in results:
-        r.profile_image = get_random_profile_image()
+        r.profile_image = get_random_profile_image(r.full_name)
     return render(request, "myapp1/search.html", {"query": query, "results": results})
 
 # ==================== AI CHATBOT WITH GEMINI ====================
@@ -373,7 +441,7 @@ def generate_doctor_cards_html(doctors):
     
     cards_html = ""
     for doc in doctors:
-        profile_img = get_random_profile_image()
+        profile_img = get_random_profile_image(doc.full_name)
         cards_html += f"""
         <div class="doctor-result">
             <img src="{profile_img}" alt="{doc.full_name}" class="result-avatar">
