@@ -1,5 +1,9 @@
 from django.urls import path
-from .views import home, create_contact, update_contact, delete_contact, success, recommend, search, chatbot, contact_detail
+from .views import (
+    home, create_contact, update_contact, delete_contact, 
+    success, recommend, search, chatbot, contact_detail,
+    generate_avatar_api  # NEW: Avatar generator API
+)
 
 urlpatterns = [
     path('', home, name='home'),
@@ -11,5 +15,7 @@ urlpatterns = [
     path('search/', search, name='search'),
     path("chatbot/", chatbot, name="chatbot"),
     path("profile/<int:id>/", contact_detail, name="contact_detail"),
-
+    
+    # NEW: AI Avatar Generator API
+    path("api/generate-avatar/", generate_avatar_api, name="generate_avatar_api"),
 ]

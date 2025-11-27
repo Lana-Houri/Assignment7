@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -8,17 +8,75 @@ from .form import CreateContactForm, RecommendationForm
 import re
 import random
 import json
+import hashlib
 
 # ==================== GEMINI API SETUP ====================
 try:
     import google.generativeai as genai
     genai.configure(api_key=settings.GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-2.5-flash')  # Updated model name
+    model = genai.GenerativeModel('gemini-2.5-flash')
 except ImportError:
     model = None
     print("Warning: google-generativeai not installed. Run: pip install google-generativeai")
 
-# ==================== PROFILE IMAGE HELPER ====================
+# ==================== AVATAR GENERATION ====================
+
+def generate_avatar_from_description(description, doctor_name):
+    """Generate avatar URL based on AI description"""
+    
+    if not model:
+        # Fallback to random if Gemini not available
+        return get_random_profile_image()
+    
+    try:
+        # Ask Gemini to analyze description and suggest avatar parameters
+        prompt = f"""
+        Based on this doctor description: "{description}"
+        
+        Generate avatar parameters in JSON format:
+        {{
+            "style": "choose one: adventurer, avataaars, bottts, personas, lorelei, micah, pixel-art",
+            "background_color": "hex color without # that matches personality",
+            "seed": "unique seed based on description"
+        }}
+        
+        Choose style based on:
+        - adventurer: Professional, corporate
+        - avataaars: Friendly, approachable
+        - bottts: Tech-savvy, modern
+        - personas: Artistic, creative
+        - lorelei: Elegant, sophisticated
+        - micah: Casual, relatable
+        - pixel-art: Fun, young
+        
+        Return ONLY valid JSON, nothing else.
+        """
+        
+        response = model.generate_content(prompt)
+        result_text = response.text.strip()
+        
+        # Clean response
+        if result_text.startswith('```json'):
+            result_text = result_text.split('```json')[1].split('```')[0]
+        elif result_text.startswith('```'):
+            result_text = result_text.split('```')[1].split('```')[0]
+        
+        params = json.loads(result_text.strip())
+        
+        # Generate DiceBear avatar URL
+        style = params.get('style', 'avataaars')
+        seed = params.get('seed', hashlib.md5(doctor_name.encode()).hexdigest())
+        bg_color = params.get('background_color', '3b82f6')
+        
+        avatar_url = f"https://api.dicebear.com/7.x/{style}/svg?seed={seed}&backgroundColor={bg_color}"
+        
+        return avatar_url, params
+        
+    except Exception as e:
+        print(f"Avatar generation error: {e}")
+        # Fallback to styled avatar
+        seed = hashlib.md5(description.encode()).hexdigest()
+        return f"https://api.dicebear.com/7.x/avataaars/svg?seed={seed}", {}
 
 def get_random_profile_image():
     """Generate placeholder profile image URL"""
@@ -45,6 +103,11 @@ def create_contact(request):
 
 def update_contact(request, id):
     contact = Contact.objects.get(id=id)
+    
+    # Generate current avatar
+    if not hasattr(contact, 'avatar_url') or not contact.avatar_url:
+        contact.avatar_url = get_random_profile_image()
+    
     if request.method == 'POST':
         form = CreateContactForm(request.POST)
         if form.is_valid():
@@ -62,7 +125,45 @@ def update_contact(request, id):
             'fees': contact.fees,
             'phone': contact.phone,
         })
-    return render(request, 'myapp1/update_contact.html', {'form': form, 'id': id})
+    
+    return render(request, 'myapp1/update_contact.html', {
+        'form': form, 
+        'id': id,
+        'contact': contact,
+        'current_avatar': getattr(contact, 'avatar_url', get_random_profile_image())
+    })
+
+@csrf_exempt
+def generate_avatar_api(request):
+    """API endpoint for generating avatars"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            description = data.get('description', '')
+            doctor_name = data.get('name', 'Doctor')
+            
+            if not description:
+                return JsonResponse({
+                    'error': 'Description required',
+                    'avatar_url': get_random_profile_image()
+                }, status=400)
+            
+            avatar_url, params = generate_avatar_from_description(description, doctor_name)
+            
+            return JsonResponse({
+                'success': True,
+                'avatar_url': avatar_url,
+                'params': params,
+                'description': description
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'error': str(e),
+                'avatar_url': get_random_profile_image()
+            }, status=500)
+    
+    return JsonResponse({'error': 'POST required'}, status=405)
 
 def delete_contact(request, id):
     contact = Contact.objects.get(id=id)
@@ -144,16 +245,6 @@ Respond ONLY with valid JSON:
     "message": "Your friendly response here"
 }
 
-Examples:
-User: "Find me a cardiologist in Chicago under $200"
-You: {"action": "search", "specialty": "cardiologist", "city": "Chicago", "max_fees": 200, "min_rating": null, "message": "Searching for affordable cardiologists in Chicago..."}
-
-User: "What's the difference between a dermatologist and a pediatrician?"
-You: {"action": "chat", "message": "A dermatologist specializes in skin conditions, while a pediatrician focuses on children's health. Would you like me to find either one for you?"}
-
-User: "Show me top rated surgeons"
-You: {"action": "search", "specialty": "surgeon", "city": null, "max_fees": null, "min_rating": 4.5, "message": "Finding top-rated surgeons for you..."}
-
 IMPORTANT:
 - Always respond with valid JSON only
 - Never include markdown, code blocks, or extra text
@@ -174,7 +265,6 @@ def get_database_summary():
 def parse_ai_response(response_text):
     """Parse AI JSON response"""
     try:
-        # Clean up response - remove markdown code blocks if present
         cleaned = response_text.strip()
         if cleaned.startswith('```json'):
             cleaned = cleaned.split('```json')[1].split('```')[0]
@@ -184,7 +274,6 @@ def parse_ai_response(response_text):
         data = json.loads(cleaned.strip())
         return data
     except json.JSONDecodeError:
-        # Fallback to chat mode if JSON parsing fails
         return {
             "action": "chat",
             "message": response_text
@@ -232,7 +321,6 @@ def generate_doctor_cards_html(doctors):
 
 @csrf_exempt
 def chatbot(request):
-    # Initialize chat history in session
     if 'chat_history' not in request.session:
         request.session['chat_history'] = []
     
@@ -240,7 +328,6 @@ def chatbot(request):
         user_input = request.POST.get("message", "")
         
         if not model:
-            # Fallback if Gemini not available
             return render(request, "myapp1/chatbot.html", {
                 "messages": [
                     {"from": "user", "text": user_input},
@@ -248,40 +335,31 @@ def chatbot(request):
                 ]
             })
         
-        # Build conversation context
         chat_history = request.session.get('chat_history', [])
         context = SYSTEM_PROMPT + get_database_summary() + "\n\nConversation:\n"
         
-        for msg in chat_history[-6:]:  # Last 6 messages for context
+        for msg in chat_history[-6:]:
             context += f"{msg['role']}: {msg['content']}\n"
         
         context += f"User: {user_input}\nAssistant:"
         
         try:
-            # Call Gemini API
             response = model.generate_content(context)
             ai_response = response.text
             
-            # Parse AI response
             parsed = parse_ai_response(ai_response)
             
-            # Handle different actions
             if parsed.get("action") == "search":
-                # Search database
                 doctors = search_doctors(parsed)
-                
-                # Generate response with doctor cards
                 intro_message = parsed.get("message", "Here are the doctors I found:")
                 cards_html = generate_doctor_cards_html(doctors)
                 bot_reply = f"<div style='margin-bottom: 12px;'>{intro_message}</div>{cards_html}"
-                
-            else:  # action == "chat"
+            else:
                 bot_reply = parsed.get("message", ai_response)
             
-            # Save to chat history
             chat_history.append({"role": "User", "content": user_input})
             chat_history.append({"role": "Assistant", "content": parsed.get("message", ai_response)})
-            request.session['chat_history'] = chat_history[-20:]  # Keep last 20 messages
+            request.session['chat_history'] = chat_history[-20:]
             request.session.modified = True
             
             return render(request, "myapp1/chatbot.html", {

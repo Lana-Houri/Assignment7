@@ -50,7 +50,7 @@
         }
 
         .container {
-            max-width: 600px;
+            max-width: 900px;
             margin: 0 auto;
             animation: fadeIn 0.5s ease;
         }
@@ -90,12 +90,10 @@
             background: var(--border-color);
         }
 
-        .form-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: var(--shadow-lg);
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 24px;
             animation: slideUp 0.5s ease 0.1s both;
         }
 
@@ -104,23 +102,179 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        form p {
-            margin-bottom: 24px;
+        /* AVATAR GENERATOR SECTION */
+        .avatar-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+            height: fit-content;
         }
 
-        /* Animate each form field */
+        .avatar-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .avatar-preview {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            border-radius: 16px;
+            border: 3px solid var(--border-color);
+            overflow: hidden;
+            animation: zoomIn 0.5s ease 0.2s both;
+            position: relative;
+        }
+
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .avatar-loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .description-box {
+            margin-bottom: 16px;
+        }
+
+        .description-box label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .description-box textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.2s;
+        }
+
+        .description-box textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .avatar-examples {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .avatar-examples strong {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .generate-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .avatar-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        /* FORM SECTION */
+        .form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        form p {
+            margin-bottom: 20px;
+        }
+
         form > p {
             animation: fadeInField 0.5s ease both;
         }
 
-        form > p:nth-of-type(1) { animation-delay: 0.2s; }
-        form > p:nth-of-type(2) { animation-delay: 0.3s; }
-        form > p:nth-of-type(3) { animation-delay: 0.4s; }
-        form > p:nth-of-type(4) { animation-delay: 0.5s; }
-        form > p:nth-of-type(5) { animation-delay: 0.6s; }
-        form > p:nth-of-type(6) { animation-delay: 0.7s; }
-        form > p:nth-of-type(7) { animation-delay: 0.8s; }
-        form > p:nth-of-type(8) { animation-delay: 0.9s; }
+        form > p:nth-of-type(1) { animation-delay: 0.3s; }
+        form > p:nth-of-type(2) { animation-delay: 0.4s; }
+        form > p:nth-of-type(3) { animation-delay: 0.5s; }
+        form > p:nth-of-type(4) { animation-delay: 0.6s; }
+        form > p:nth-of-type(5) { animation-delay: 0.7s; }
+        form > p:nth-of-type(6) { animation-delay: 0.8s; }
+        form > p:nth-of-type(7) { animation-delay: 0.9s; }
+        form > p:nth-of-type(8) { animation-delay: 1s; }
 
         @keyframes fadeInField {
             from { opacity: 0; transform: translateX(-20px); }
@@ -153,15 +307,11 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        input:hover {
-            border-color: var(--accent-primary);
-        }
-
         .actions {
             display: flex;
             gap: 12px;
             margin-top: 32px;
-            animation: fadeIn 0.5s ease 1s both;
+            animation: fadeIn 0.5s ease 1.1s both;
         }
 
         button[type="submit"] {
@@ -183,10 +333,6 @@
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
 
-        button[type="submit"]:active {
-            transform: translateY(0);
-        }
-
         .back-btn {
             padding: 14px 24px;
             background: var(--bg-secondary);
@@ -205,30 +351,84 @@
             background: var(--border-color);
             transform: translateY(-2px);
         }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .avatar-section {
+                order: 1;
+            }
+            
+            .form-card {
+                order: 2;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="header">
-            <h1>✏️ Edit Doctor</h1>
+            <h1>✏️ Edit Doctor Profile</h1>
             <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
         </div>
 
-        <div class="form-card">
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
+        <div class="content-grid">
+            <!-- AVATAR GENERATOR SECTION -->
+            <div class="avatar-section">
+                <h3 class="avatar-title">🎨 AI Avatar Generator</h3>
                 
-                <div class="actions">
-                    <button type="submit">✓ Save Changes</button>
-                    <a href="/" class="back-btn">Cancel</a>
+                <div class="avatar-preview">
+                    <img id="avatarImage" src="{{ current_avatar }}" alt="Doctor Avatar">
+                    <div class="avatar-loading" id="avatarLoading">
+                        <div class="spinner"></div>
+                    </div>
                 </div>
-            </form>
+
+                <div class="description-box">
+                    <label for="avatarDescription">Describe the avatar style:</label>
+                    <textarea 
+                        id="avatarDescription" 
+                        placeholder="e.g., A professional-looking cardiologist with a warm smile and modern style"
+                    ></textarea>
+                </div>
+
+                <div class="avatar-examples">
+                    <strong>💡 Examples:</strong>
+                    • "Friendly pediatrician with colorful, fun style"<br>
+                    • "Serious surgeon with professional corporate look"<br>
+                    • "Modern tech-savvy neurologist"<br>
+                    • "Warm elderly family doctor"
+                </div>
+
+                <button class="generate-btn" onclick="generateAvatar()" id="generateBtn">
+                    ✨ Generate AI Avatar
+                </button>
+
+                <div class="avatar-info" id="avatarInfo">
+                    Powered by Gemini AI + DiceBear
+                </div>
+            </div>
+
+            <!-- FORM SECTION -->
+            <div class="form-card">
+                <form method="post" id="doctorForm">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    
+                    <div class="actions">
+                        <button type="submit">✓ Save Changes</button>
+                        <a href="/" class="back-btn">Cancel</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
+        // Theme toggle
         function toggleTheme() {
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
@@ -242,8 +442,87 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
         document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
 
-        // Add smooth focus effects
-        document.querySelectorAll('input').forEach(input => {
+        // Avatar generation
+        async function generateAvatar() {
+            const description = document.getElementById('avatarDescription').value;
+            const doctorName = document.querySelector('input[name="full_name"]')?.value || 'Doctor';
+            
+            if (!description.trim()) {
+                alert('Please describe the avatar style you want!');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('avatarLoading').classList.add('active');
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('generateBtn').textContent = '⏳ Generating...';
+            document.getElementById('avatarInfo').textContent = '🤖 AI is creating your avatar...';
+
+            try {
+                const response = await fetch('/api/generate-avatar/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        description: description,
+                        name: doctorName
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update avatar with animation
+                    const avatarImg = document.getElementById('avatarImage');
+                    avatarImg.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        avatarImg.src = data.avatar_url;
+                        avatarImg.style.transition = 'opacity 0.5s ease';
+                        avatarImg.style.opacity = '1';
+                    }, 300);
+
+                    // Show success message
+                    document.getElementById('avatarInfo').innerHTML = `
+                        ✅ Avatar generated!<br>
+                        <small>Style: ${data.params.style || 'custom'}</small>
+                    `;
+                } else {
+                    throw new Error(data.error || 'Generation failed');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('avatarInfo').innerHTML = `
+                    ❌ Generation failed<br>
+                    <small>${error.message}</small>
+                `;
+            } finally {
+                // Hide loading
+                document.getElementById('avatarLoading').classList.remove('active');
+                document.getElementById('generateBtn').disabled = false;
+                document.getElementById('generateBtn').textContent = '✨ Generate AI Avatar';
+            }
+        }
+
+        // Auto-generate on Enter key
+        document.getElementById('avatarDescription').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                e.preventDefault();
+                generateAvatar();
+            }
+        });
+
+        // Form submission with loading state
+        document.getElementById('doctorForm').addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.textContent = '⏳ Saving...';
+            submitBtn.disabled = true;
+        });
+
+        // Smooth focus effects
+        document.querySelectorAll('input, textarea').forEach(input => {
             input.addEventListener('focus', function() {
                 this.parentElement.style.transition = 'transform 0.3s ease';
                 this.parentElement.style.transform = 'scale(1.01)';
@@ -251,21 +530,6 @@
             input.addEventListener('blur', function() {
                 this.parentElement.style.transform = 'scale(1)';
             });
-        });
-
-        // Auto-focus first input
-        const firstInput = document.querySelector('input');
-        if (firstInput) {
-            setTimeout(() => firstInput.focus(), 500);
-        }
-
-        // Add loading state on submit
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function() {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            submitBtn.textContent = '⏳ Saving...';
-            submitBtn.style.opacity = '0.7';
-            submitBtn.disabled = true;
         });
     </script>
 
