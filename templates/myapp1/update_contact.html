@@ -403,12 +403,22 @@
                     • "Warm elderly family doctor"
                 </div>
 
+                <div class="generation-method" style="margin-bottom: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                        <input type="checkbox" id="useImagen" checked style="width: auto;">
+                        <span>🎨 Use Imagen 4.0 Ultra (Highest Quality)</span>
+                    </label>
+                    <div style="font-size: 11px; color: var(--text-secondary); margin-left: 24px;">
+                        Unchecked = DiceBear avatars (faster, illustrated)
+                    </div>
+                </div>
+
                 <button class="generate-btn" onclick="generateAvatar()" id="generateBtn">
                     ✨ Generate AI Avatar
                 </button>
 
                 <div class="avatar-info" id="avatarInfo">
-                    Powered by Gemini AI + DiceBear
+                    Powered by Gemini 2.5 + Imagen 4.0 Ultra
                 </div>
             </div>
 
@@ -446,6 +456,7 @@
         async function generateAvatar() {
             const description = document.getElementById('avatarDescription').value;
             const doctorName = document.querySelector('input[name="full_name"]')?.value || 'Doctor';
+            const useImagen = document.getElementById('useImagen').checked;
             
             if (!description.trim()) {
                 alert('Please describe the avatar style you want!');
@@ -455,8 +466,14 @@
             // Show loading
             document.getElementById('avatarLoading').classList.add('active');
             document.getElementById('generateBtn').disabled = true;
-            document.getElementById('generateBtn').textContent = '⏳ Generating...';
-            document.getElementById('avatarInfo').textContent = '🤖 AI is creating your avatar...';
+            
+            if (useImagen) {
+                document.getElementById('generateBtn').textContent = '⏳ Generating with Imagen 4.0 Ultra...';
+                document.getElementById('avatarInfo').textContent = '🎨 Creating ultra-quality portrait (20-40 seconds)...';
+            } else {
+                document.getElementById('generateBtn').textContent = '⏳ Generating...';
+                document.getElementById('avatarInfo').textContent = '🤖 Creating illustrated avatar...';
+            }
 
             try {
                 const response = await fetch('/api/generate-avatar/', {
@@ -466,7 +483,8 @@
                     },
                     body: JSON.stringify({
                         description: description,
-                        name: doctorName
+                        name: doctorName,
+                        use_imagen: useImagen
                     })
                 });
 
@@ -484,9 +502,10 @@
                     }, 300);
 
                     // Show success message
+                    const method = data.params.method || 'unknown';
                     document.getElementById('avatarInfo').innerHTML = `
                         ✅ Avatar generated!<br>
-                        <small>Style: ${data.params.style || 'custom'}</small>
+                        <small>Method: ${method} ${data.params.style ? `| Style: ${data.params.style}` : ''}</small>
                     `;
                 } else {
                     throw new Error(data.error || 'Generation failed');
